@@ -71,17 +71,16 @@ const buildHeaderFromIndex = (script: UserScript) => {
         result += '// @run-at'.padEnd(padLen, ' ') + script.runAt + '\n'
     }
     if (script.grants) {
-        if (typeof script.grants === 'string') {
-            result += '// @grant'.padEnd(padLen, ' ') + script.grants + '\n'
-        } else {
-            const arr = script.grants
-            arr.forEach(item => {
-                if (typeof item === 'string') {
-                    result += '// @grant'.padEnd(padLen, ' ') + item + '\n'
-                } else {
-                    result += '// @grant'.padEnd(padLen, ' ') + GmFunctions[item] + '\n'
-                }
-            })
+        function grantParser(grant: string | GmFunctions) {
+            if (typeof grant === 'string') {
+                return '// @grant'.padEnd(padLen, ' ') + grant + '\n';
+            } else {
+                return '// @grant'.padEnd(padLen, ' ') + GmFunctions[grant] + '\n';
+            }
+        }
+        const grants: Array<string | GmFunctions> = Array.isArray(script.grants) ? script.grants : [script.grants];
+        for (const grant of grants) {
+            result += grantParser(grant);
         }
     }
     if (script.noframes) {
@@ -105,8 +104,8 @@ const buildHeaderFromIndex = (script: UserScript) => {
             // 检测是否包含换行符
             if (comment.includes('\n')) {
                 return comment.split('\n')
-                .map(line => parseCommentString(line))
-                .join('\n');
+                    .map(line => parseCommentString(line))
+                    .join('\n');
             } else {
                 // 去除左侧的空格后检测是否以//开始
                 if (comment.trimStart().startsWith('//')) {
@@ -134,11 +133,11 @@ const buildHeaderFromIndex = (script: UserScript) => {
         }
     }
 
-    return result
+    return result;
 }
 
 /**
- * 
+ *
  * @returns 如果存在header/index.ts文件，则优先从index.ts中构造header，
  *          如果不存在，则从header/head中直接读取header
  */
@@ -148,6 +147,7 @@ const buildHeader = () => {
         return buildHeaderFromIndex(script);
     } catch (e) {
         try{
+            console.error("解析header/index.ts失败，查找header/head文件。", e)
             const header: string = readFileSync('./header/head', 'utf-8');
             return header;
         } catch (e) {
