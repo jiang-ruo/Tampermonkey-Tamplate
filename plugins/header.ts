@@ -1,10 +1,10 @@
 import { Plugin } from 'vite';
-import script from '../header'
-import {GmFunctions} from "../header/UserScript";
+import {GmFunctions, UserScript} from "../header/UserScript";
+import {readFileSync} from "fs";
 
 const padLen = 20
 
-const buildHeader = () => {
+const buildHeaderFromIndex = (script: UserScript) => {
     let result = '// ==UserScript==\n'
     if (script.name) {
         result += '// @name'.padEnd(padLen, ' ') + script.name + '\n'
@@ -92,9 +92,68 @@ const buildHeader = () => {
     if (script.nocompat) {
         result += '// @nocompat'.padEnd(padLen, ' ') + script.nocompat + '\n'
     }
+    if (script.license) {
+        result += `// @license ${script.license}\n`
+    }
     result += '// ==/UserScript==\n'
 
+
+
+    if (script.comment) {
+        result += '//\n'
+        function parseCommentString(comment: string): string {
+            // 检测是否包含换行符
+            if (comment.includes('\n')) {
+                return comment.split('\n')
+                .map(line => parseCommentString(line))
+                .join('\n');
+            } else {
+                // 去除左侧的空格后检测是否以//开始
+                if (comment.trimStart().startsWith('//')) {
+                    return comment.trimStart();
+                } else {
+                    return `// ${comment}`;
+                }
+            }
+        }
+        if (typeof script.comment === 'string') {
+            result += `${parseCommentString(script.comment)}\n`
+        } else {
+            script.comment.forEach(c => {
+                result += `${parseCommentString(c)}\n`
+            })
+        }
+    }
+    if (script.declares) {
+        if (typeof script.declares === 'string') {
+            result += `/* global ${script.declares} */\n`
+        } else {
+            script.declares.forEach(d => {
+                result += `/* global ${d} */\n`
+            })
+        }
+    }
+
     return result
+}
+
+/**
+ * 
+ * @returns 如果存在header/index.ts文件，则优先从index.ts中构造header，
+ *          如果不存在，则从header/head中直接读取header
+ */
+const buildHeader = () => {
+    try {
+        const script: UserScript = require('../header').default
+        return buildHeaderFromIndex(script);
+    } catch (e) {
+        try{
+            const header: string = readFileSync('./header/head', 'utf-8');
+            return header;
+        } catch (e) {
+            throw new Error('未找到油猴头部配置文件header/index.ts或header/head');
+        }
+    }
 }
 
 const headerPlugin = (): Plugin => {

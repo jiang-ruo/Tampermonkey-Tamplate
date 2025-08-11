@@ -46,7 +46,20 @@ export enum GmFunctions {
     getTabs,
     notification,
     setClipboard,
-    info
+    info,
+    GM_addStyle,
+    GM_getResourceText,
+    "GM.getResourceText"
+}
+
+export enum License {
+    LGPL_3_0 = "LGPL-3.0",
+    Mozilla_2_0 = "Mozilla-2.0",
+    GPL_3_0 = "GPL-3.0",
+    BSD_2_CLAUSE = "BSD-2-Clause",
+    BSD_3_CLAUSE = "BSD-3-Clause",
+    MIT = "MIT",
+    Apache_2_0 = "Apache-2.0"
 }
 
 export interface UserScript{
@@ -154,7 +167,7 @@ export interface UserScript{
      * window.focus
      * window.onurlchange
      */
-    grants ?: (GmFunctions | string)[] | 'none';
+    grants ?: GmFunctions[] | 'none';
     /**
      * 此标记使脚本在主页上运行，但不是在 iframe 上运行。
      */
@@ -166,4 +179,19 @@ export interface UserScript{
      * 要保持此标记的可扩展性，可以添加可由脚本处理的浏览器名称。
      */
     nocompat?: string;
+
+    /**
+     * 开源许可
+     */
+    license?: License;
+
+    /**
+     * 在// ==/UserScript==下方生成注释
+     */
+    comment?: string | string[];
+
+    /**
+     * 在油猴脚本中声明变量
+     */
+    declares?: string | string[]
 }

@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "node": "22",
   "scripts": {
     "build": "tsc && vite build",
     "build:sync": "tsc && vite build --watch --mode sync",
@@ -19,8 +20,5 @@
     "typescript": "^5.2.2",
     "upath": "2.0.1",
     "vite": "^5.3.1"
-  },
-  "dependencies": {
-    "lodash": "^4.17.21"
   }
 }

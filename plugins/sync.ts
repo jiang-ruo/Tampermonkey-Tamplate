@@ -1,12 +1,45 @@
 import { Plugin } from 'vite';
 import fs from 'fs'
 import path from 'path'
-import script from '../header'
+import { UserScript } from '../header/UserScript';
+
+const getScript = (): UserScript | { name: string } | undefined => {
+    try {
+        const script = require('../header').default;
+        return script;
+    } catch (e) {
+        // 如果找不到../header，则尝试读取../header/head文件
+        try {
+            const headPath = path.join(__dirname, '../header/head');
+                // 文件不存在，直接返回
+            if (!fs.existsSync(headPath)) return
+            const content = fs.readFileSync(headPath, 'utf-8');
+            
+            // 更精确的油猴脚本@name匹配
+            // 1. 首先检查是否在UserScript块中
+            const userScriptMatch = content.match(/\/\/ ==UserScript==[\s\S]*?\/\/ ==\/UserScript==/);
+            if (!userScriptMatch) return;
+            
+            // 2. 在UserScript块中匹配@name
+            const userScriptContent = userScriptMatch[0];
+            const nameMatch = userScriptContent.match(/@name\s+([^\r\n]+)/);
+            if (nameMatch) {
+                const name = nameMatch[1].trim();
+                return { name };
+            }
+        } catch (e2) {
+            // 读取失败，返回undefined
+            return;
+        }
+    }
+}
 
 export default (): Plugin => {
     return {
         name: 'sync-plugin',
         closeBundle(){
+            let script = getScript();
+            if(!script) return;
             const files = fs.readdirSync('temp/Tampermonkey/sync',{ withFileTypes: true })
             const jsonFiles = files.filter(file => file.isFile() && file.name.endsWith('.meta.json'))
             for(const file of jsonFiles){
