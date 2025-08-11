@@ -5,21 +5,23 @@ import { UserScript } from '../header/UserScript';
 
 const getScript = (): UserScript | { name: string } | undefined => {
     try {
-        const script = require('../header').default;
+        const script = require('../header/index').default();
+        if (!script) throw new Error("未找到header/inex.ts")
         return script;
     } catch (e) {
         // 如果找不到../header，则尝试读取../header/head文件
         try {
+            console.log("读取header/index.ts文件失败，尝试加载header/head文件")
             const headPath = path.join(__dirname, '../header/head');
-                // 文件不存在，直接返回
+            // 文件不存在，直接返回
             if (!fs.existsSync(headPath)) return
             const content = fs.readFileSync(headPath, 'utf-8');
-            
+
             // 更精确的油猴脚本@name匹配
             // 1. 首先检查是否在UserScript块中
             const userScriptMatch = content.match(/\/\/ ==UserScript==[\s\S]*?\/\/ ==\/UserScript==/);
             if (!userScriptMatch) return;
-            
+
             // 2. 在UserScript块中匹配@name
             const userScriptContent = userScriptMatch[0];
             const nameMatch = userScriptContent.match(/@name\s+([^\r\n]+)/);
