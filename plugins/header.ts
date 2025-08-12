@@ -136,23 +136,34 @@ const buildHeaderFromIndex = (script: UserScript) => {
     return result;
 }
 
+const loadHeader = (): UserScript | string | undefined =>  {
+    try{
+        const script: UserScript = require('../header').default
+        if(!script) throw new Error('未找到header/inex.ts');
+        return script;
+    } catch (e) {
+        try {
+            console.log("读取header/index.ts文件失败，尝试加载header/head文件")
+            const header: string = readFileSync('./header/head', 'utf-8');
+            return header;
+        } catch (e) {
+            return;
+        }
+    }
+}
+
 /**
  *
  * @returns 如果存在header/index.ts文件，则优先从index.ts中构造header，
  *          如果不存在，则从header/head中直接读取header
  */
-const buildHeader = () => {
-    try {
-        const script: UserScript = require('../header').default
+const buildHeader = (): string => {
+    const script = loadHeader();
+    if(!script) return "";
+    if(typeof script === 'string') {
+        return script;
+    } else {
         return buildHeaderFromIndex(script);
-    } catch (e) {
-        try{
-            console.error("解析header/index.ts失败，查找header/head文件。", e)
-            const header: string = readFileSync('./header/head', 'utf-8');
-            return header;
-        } catch (e) {
-            throw new Error('未找到油猴头部配置文件header/index.ts或header/head');
-        }
     }
 }
 
