@@ -1,6 +1,7 @@
 import { Plugin } from 'vite';
 import {GmFunctions, UserScript} from "../header/UserScript";
 import {readFileSync} from "fs";
+import format from "string-template"
 
 const padLen = 20
 
@@ -136,16 +137,17 @@ const buildHeaderFromIndex = (script: UserScript) => {
     return result;
 }
 
-const loadHeader = (): UserScript | string | undefined =>  {
+const loadHeader = (meta?: {[key: string]: string | number}): UserScript | string | undefined =>  {
     try{
         const script: UserScript = require('../header').default
         if(!script) throw new Error('未找到header/inex.ts');
         return script;
     } catch (e) {
         try {
-            console.log("读取header/index.ts文件失败，尝试加载header/head文件")
+            console.log("读取header/index.ts文件失败，尝试加载header/head文件");
             const header: string = readFileSync('./header/head', 'utf-8');
-            return header;
+            const result = format(header, meta);
+            return result;
         } catch (e) {
             return;
         }
@@ -157,8 +159,8 @@ const loadHeader = (): UserScript | string | undefined =>  {
  * @returns 如果存在header/index.ts文件，则优先从index.ts中构造header，
  *          如果不存在，则从header/head中直接读取header
  */
-const buildHeader = (): string => {
-    const script = loadHeader();
+const buildHeader = (meta?: {[key: string]: string | number}): string => {
+    const script = loadHeader(meta);
     if(!script) return "";
     if(typeof script === 'string') {
         return script;
@@ -167,7 +169,7 @@ const buildHeader = (): string => {
     }
 }
 
-const headerPlugin = (): Plugin => {
+const headerPlugin = (meta?: {[key: string]: string | number}): Plugin => {
     return {
         name: 'header-plugin',
         generateBundle(_, bundle) {
@@ -175,7 +177,7 @@ const headerPlugin = (): Plugin => {
                 if (fileName === 'main.js') {
                     const file = bundle[fileName];
                     if (file.type === 'chunk'&& file.code) {
-                        const header = buildHeader()
+                        const header = buildHeader(meta)
                         file.code = header + file.code;
                     }
                 }

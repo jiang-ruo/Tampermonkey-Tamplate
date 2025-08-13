@@ -36,7 +36,7 @@ console.log('hello world')
 
 头部区域的开发是在`header/index.ts`或`header/head`。
 `header/index.ts`使用了typescript，这样会有IDE完全支持，而不是单纯的写几个注释；
-`header/head`则直接将油猴脚本头部放入head文件即可。
+`header/head`则直接将油猴脚本头部放入head文件即可，支持`string-template`模板。
 若上述二者同时存在，则优先使用`header/index.ts`。
 
 ![img](https://pic.imgdb.cn/item/6506d2f7661c6c8e5458afce.png)

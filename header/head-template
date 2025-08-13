@@ -1,4 +1,5 @@
 // ==UserScript==
+// @version     {version} // 在vite.config.ts中配置version的具体数值
 // 油猴脚本声明
 // ==/UserScript==
 //
