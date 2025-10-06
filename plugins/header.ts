@@ -147,7 +147,8 @@ const loadHeader = (meta?: {[key: string]: string | number}): UserScript | strin
             console.log("读取header/index.ts文件失败，尝试加载header/head文件");
             const header: string = readFileSync('./header/head', 'utf-8');
             const result = format(header, meta);
-            return result;
+            // 最后一个符号不是\n则添加\n
+            return result.endsWith('\n') ? result : result + '\n';
         } catch (e) {
             return;
         }

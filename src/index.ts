@@ -1,2 +1,5 @@
 
-// do something
+
+(async function() {
+	// do something
+})();
