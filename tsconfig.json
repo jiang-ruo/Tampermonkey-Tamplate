@@ -27,5 +27,8 @@
     "transpileOnly": true,
     "files": true
   },
-  "include": ["src"]
+  "include": [
+    "src",
+    "src/**/*.vue"
+  ]
 }

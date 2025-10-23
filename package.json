@@ -14,6 +14,8 @@
     "@types/node": "^20.14.11",
     "@types/string-template": "^1.0.7",
     "@types/tampermonkey": "^5.0.4",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "@vue/compiler-sfc": "^3.5.22",
     "chokidar": "3.4.3",
     "dialog": "0.3.1",
     "glob": "7.1.6",
@@ -22,6 +24,10 @@
     "ts-node": "^9.1.1",
     "typescript": "^5.2.2",
     "upath": "2.0.1",
-    "vite": "^5.3.1"
+    "vite": "^5.3.1",
+    "vue-tsc": "^3.1.1"
+  },
+  "dependencies": {
+    "vue": "^3.5.22"
   }
 }
