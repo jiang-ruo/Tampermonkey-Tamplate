@@ -4,6 +4,7 @@
 - TypeScript完全支持
 - 最新版本放弃旧webpack编译，用vite编译
 - 热更新部署 每次更新会自动同步到油猴中，不需要手动复制粘贴！
+- vue-router会修改页面URL
 
 ## TODO
 1. 添加多脚本支持
