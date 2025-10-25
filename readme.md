@@ -8,6 +8,14 @@
 ## TODO
 1. 添加多脚本支持
 
+## 分支关系
+
+vite -> vue -> vue-router
+
+vite分支的内容应当合并到vue分支
+
+vue分支的内容应当合并到vue-router分支
+
 ## 使用方式
 
 clone本项目，然后执行
