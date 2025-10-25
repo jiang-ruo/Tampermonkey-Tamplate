@@ -12,7 +12,9 @@
 方便观察main.js是否更新
 
 ## 模块设计
-### 1. 添加编译时间
+### 1. 优化package.json的devDependencies
+
+### 2. 添加编译时间
 
 #### 功能
 
