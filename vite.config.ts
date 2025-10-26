@@ -9,7 +9,7 @@ import vueCssPlugin from "./plugins/vue-css.ts";
  * 以head文件构建头文件时，可以使用该选项
  */
 const meta = {
-    version: "1.0.0"
+    version: "0.0.0"
 }
 
 export default defineConfig({
