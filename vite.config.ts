@@ -26,7 +26,7 @@ export default defineConfig({
         headerPlugin({
             meta,
             allowNoHead: true,
-            // addExportTime: true,
+            addExportTime: true,
         }),
         {
             ...syncPlugin(),
