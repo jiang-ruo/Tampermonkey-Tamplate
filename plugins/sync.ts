@@ -1,25 +1,34 @@
 import { Plugin } from 'vite';
-import fs from 'fs'
+import fs, {readFileSync} from 'fs'
 import path from 'path'
-import {readHeaderFile} from "./header";
+import {HEAD_FILE_INDEX, readHeaderFile} from "./header";
 import {UserScript} from "../header/UserScript";
 
 const getScript = (): UserScript | { name: string } | undefined => {
-    // 想要实时同步到油猴，就必须要头部
-    const content = readHeaderFile();
-    if (!content) return;
-    if (typeof content !== "string") return content;
-    // 更精确的油猴脚本@name匹配
-    // 1. 首先检查是否在UserScript块中
-    const userScriptMatch = content.match(/\/\/ ==UserScript==[\s\S]*?\/\/ ==\/UserScript==/);
-    if (!userScriptMatch) return;
-
-    // 2. 在UserScript块中匹配@name
-    const userScriptContent = userScriptMatch[0];
-    const nameMatch = userScriptContent.match(/@grant\s+([^\r\n]+)/);
-    if (nameMatch) {
-        const name = nameMatch[1].trim();
-        return { name };
+    try{
+        const hf = `../${HEAD_FILE_INDEX}`;
+        const script: UserScript = require(hf).default
+        return script;
+    } catch (e1) {
+        try {
+            // 这里不能直接使用plugins/header#readHeaderFile的结果，因为缺少opt.meta数据
+            const main: string = readFileSync(`./dist/main.js`, 'utf-8');
+            // 更精确的油猴脚本@name匹配
+            // 1. 首先检查是否在UserScript块中
+            const userScriptMatch = main.match(/\/\/ ==UserScript==[\s\S]*?\/\/ ==\/UserScript==/);
+            if (!userScriptMatch) throw new Error("解析Tampermonkey头声明失败")
+            // 2. 在UserScript块中匹配@name
+            const userScriptContent = userScriptMatch[0];
+            const nameMatch = userScriptContent.match(/@name\s+([^\r\n]+)/);
+            if (nameMatch) {
+                const name = nameMatch[1].trim();
+                return { name };
+            }
+        } catch (e2) {
+            const e1NotSupported = e1 instanceof Error && e1.message === `Dynamic require of "../${HEAD_FILE_INDEX}" is not supported`
+            if (!e1NotSupported) throw e1;
+            throw e2;
+        }
     }
 }
 
