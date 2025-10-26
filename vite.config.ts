@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 
-import headerPlugin from "./plugins/header";
+import {headerLoadPlugin, headerPostPlugin} from "./plugins/header";
 import syncPlugin from './plugins/sync';
 import vue from '@vitejs/plugin-vue'
 
@@ -28,7 +28,12 @@ export default defineConfig({
     },
     plugins: [
         vue(),
-        headerPlugin(meta),
+		headerLoadPlugin({
+			meta,
+			allowNoHead: true,
+			addExportTime: true,
+		}),
+		headerPostPlugin(),
         {
             ...syncPlugin(),
             apply: (_, {mode}) => mode === 'sync'

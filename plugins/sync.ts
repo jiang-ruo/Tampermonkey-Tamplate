@@ -1,38 +1,25 @@
 import { Plugin } from 'vite';
 import fs from 'fs'
 import path from 'path'
-import { UserScript } from '../header/UserScript';
+import {readHeaderFile} from "./header";
+import {UserScript} from "../header/UserScript";
 
 const getScript = (): UserScript | { name: string } | undefined => {
-    try {
-        const script = require('../header').default;
-        if (!script) throw new Error("未找到header/inex.ts")
-        return script;
-    } catch (e) {
-        // 如果找不到../header，则尝试读取../header/head文件
-        try {
-            console.log("读取header/index.ts文件失败，尝试加载header/head文件")
-            const headPath = path.join(__dirname, '../header/head');
-            // 文件不存在，直接返回
-            if (!fs.existsSync(headPath)) return
-            const content = fs.readFileSync(headPath, 'utf-8');
+    // 想要实时同步到油猴，就必须要头部
+    const content = readHeaderFile();
+    if (!content) return;
+    if (typeof content !== "string") return content;
+    // 更精确的油猴脚本@name匹配
+    // 1. 首先检查是否在UserScript块中
+    const userScriptMatch = content.match(/\/\/ ==UserScript==[\s\S]*?\/\/ ==\/UserScript==/);
+    if (!userScriptMatch) return;
 
-            // 更精确的油猴脚本@name匹配
-            // 1. 首先检查是否在UserScript块中
-            const userScriptMatch = content.match(/\/\/ ==UserScript==[\s\S]*?\/\/ ==\/UserScript==/);
-            if (!userScriptMatch) return;
-
-            // 2. 在UserScript块中匹配@name
-            const userScriptContent = userScriptMatch[0];
-            const nameMatch = userScriptContent.match(/@name\s+([^\r\n]+)/);
-            if (nameMatch) {
-                const name = nameMatch[1].trim();
-                return { name };
-            }
-        } catch (e2) {
-            // 读取失败，返回undefined
-            return;
-        }
+    // 2. 在UserScript块中匹配@name
+    const userScriptContent = userScriptMatch[0];
+    const nameMatch = userScriptContent.match(/@name\s+([^\r\n]+)/);
+    if (nameMatch) {
+        const name = nameMatch[1].trim();
+        return { name };
     }
 }
 

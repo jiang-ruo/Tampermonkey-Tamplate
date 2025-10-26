@@ -8,6 +8,14 @@
 ## TODO
 1. 添加多脚本支持
 
+## 分支关系
+
+vite -> vue -> vue-router
+
+vite分支的内容应当合并到vue分支
+
+vue分支的内容应当合并到vue-router分支
+
 ## 使用方式
 
 clone本项目，然后执行
@@ -45,7 +53,7 @@ console.log('hello world')
 
 ## 正文
 
-正文开发是在`src/index.ts`，在开发时，如果使用到`GM_`相关函数，有完整的声明支持：
+开发是在`src/index.ts`，在开发时，如果使用到`GM_`相关函数，有完整的声明支持：
 
 ![img](https://pic.imgdb.cn/item/6506d31d661c6c8e5458b3b2.png)
 
@@ -83,3 +91,11 @@ console.log('hello world')
 [tempermonkey.d.ts](https://www.cnblogs.com/stumpx/p/15211436.html)
 
 [server.cjs](https://github.com/Tampermonkey/tamperdav/blob/master/server.js)  （有修改）
+
+## 版本说明
+
+### v1.1.2
+1. 编译结果添加编译时间
+
+### v1.0.0
+1. 添加header/head为头部配置文件
