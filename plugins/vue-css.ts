@@ -37,11 +37,11 @@ function addElementCode(css: string): string {
 	return `GM_addElement('style', { textContent: \`${css}\` });\n`
 }
 
-function newAddStyleCode(css: string): string {
+function newAddStyleCode(_css: string): string {
 	throw new Error("GM.addStyle");
 }
 
-function newAddElementCode(css: string): string {
+function newAddElementCode(_css: string): string {
 	throw new Error("GM.addElement");
 }
 
