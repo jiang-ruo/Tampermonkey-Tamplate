@@ -1,8 +1,9 @@
 import { defineConfig } from 'vite'
 
-import headerPlugin from "./plugins/header";
-import syncPlugin from './plugins/sync';
+import {headerLoadPlugin, headerPostPlugin} from "./plugins/header";
+import {syncPlugin} from './plugins/sync';
 import vue from '@vitejs/plugin-vue'
+import vueCssPlugin from "./plugins/vue-css.ts";
 
 /**
  * 以head文件构建头文件时，可以使用该选项
@@ -28,7 +29,13 @@ export default defineConfig({
     },
     plugins: [
         vue(),
-        headerPlugin(meta),
+		vueCssPlugin(),
+		headerLoadPlugin({
+			meta,
+			allowNoHead: true,
+			addExportTime: true,
+		}),
+		headerPostPlugin(),
         {
             ...syncPlugin(),
             apply: (_, {mode}) => mode === 'sync'

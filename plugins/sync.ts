@@ -1,27 +1,22 @@
 import { Plugin } from 'vite';
-import fs from 'fs'
+import fs, {readFileSync} from 'fs'
 import path from 'path'
-import { UserScript } from '../header/UserScript';
+import {HEAD_FILE_INDEX, readHeaderFile} from "./header";
+import {UserScript} from "../header/UserScript";
 
 const getScript = (): UserScript | { name: string } | undefined => {
-    try {
-        const script = require('../header').default;
-        if (!script) throw new Error("未找到header/inex.ts")
+    try{
+        const hf = `../${HEAD_FILE_INDEX}`;
+        const script: UserScript = require(hf).default
         return script;
-    } catch (e) {
-        // 如果找不到../header，则尝试读取../header/head文件
+    } catch (e1) {
         try {
-            console.log("读取header/index.ts文件失败，尝试加载header/head文件")
-            const headPath = path.join(__dirname, '../header/head');
-            // 文件不存在，直接返回
-            if (!fs.existsSync(headPath)) return
-            const content = fs.readFileSync(headPath, 'utf-8');
-
+            // 这里不能直接使用plugins/header#readHeaderFile的结果，因为缺少opt.meta数据
+            const main: string = readFileSync(`./dist/main.js`, 'utf-8');
             // 更精确的油猴脚本@name匹配
             // 1. 首先检查是否在UserScript块中
-            const userScriptMatch = content.match(/\/\/ ==UserScript==[\s\S]*?\/\/ ==\/UserScript==/);
-            if (!userScriptMatch) return;
-
+            const userScriptMatch = main.match(/\/\/ ==UserScript==[\s\S]*?\/\/ ==\/UserScript==/);
+            if (!userScriptMatch) throw new Error("解析Tampermonkey头声明失败")
             // 2. 在UserScript块中匹配@name
             const userScriptContent = userScriptMatch[0];
             const nameMatch = userScriptContent.match(/@name\s+([^\r\n]+)/);
@@ -30,13 +25,14 @@ const getScript = (): UserScript | { name: string } | undefined => {
                 return { name };
             }
         } catch (e2) {
-            // 读取失败，返回undefined
-            return;
+            const e1NotSupported = e1 instanceof Error && e1.message === `Dynamic require of "../${HEAD_FILE_INDEX}" is not supported`
+            if (!e1NotSupported) throw e1;
+            throw e2;
         }
     }
 }
 
-export default (): Plugin => {
+const syncPlugin = (): Plugin => {
     return {
         name: 'sync-plugin',
         closeBundle(){
@@ -60,3 +56,5 @@ export default (): Plugin => {
         }
     }
 }
+
+export { syncPlugin }
