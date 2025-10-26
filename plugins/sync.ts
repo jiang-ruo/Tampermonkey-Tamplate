@@ -1,7 +1,7 @@
 import { Plugin } from 'vite';
 import fs, {readFileSync} from 'fs'
 import path from 'path'
-import {HEAD_FILE_INDEX, readHeaderFile} from "./header";
+import {HEAD_FILE_INDEX} from "./header";
 import {UserScript} from "../header/UserScript";
 
 /**
