@@ -23,7 +23,11 @@ export default defineConfig({
         outDir: 'dist'
     },
     plugins: [
-        headerPlugin(meta),
+        headerPlugin({
+            meta,
+            allowNoHead: true,
+            // addExportTime: true,
+        }),
         {
             ...syncPlugin(),
             apply: (_, {mode}) => mode === 'sync'

@@ -1,7 +1,7 @@
 import { Plugin } from 'vite';
 import {GmFunctions, UserScript} from "../header/UserScript";
 import {readFileSync} from "fs";
-import format from "string-template"
+import format from "string-template";
 
 const padLen = 20
 
@@ -137,22 +137,61 @@ const buildHeaderFromIndex = (script: UserScript) => {
     return result;
 }
 
-const loadHeader = (meta?: {[key: string]: string | number}): UserScript | string | undefined =>  {
+const loadHeader = (opt: Option): string | undefined =>  {
+    const index = "header/index.ts"
+    const head = "header/head";
     try{
-        const script: UserScript = require('../header').default
-        if(!script) throw new Error('未找到header/inex.ts');
-        return script;
-    } catch (e) {
+        console.log(`加载Tampermonkey头声明文件: ${index}`)
+        const hf = `../${index}`;
+        const script: UserScript = require(hf).default
+        return buildHeaderFromIndex(script);
+    } catch (e1) {
         try {
-            console.log("读取header/index.ts文件失败，尝试加载header/head文件");
-            const header: string = readFileSync('./header/head', 'utf-8');
-            const result = format(header, meta);
-            // 最后一个符号不是\n则添加\n
-            return result.endsWith('\n') ? result : result + '\n';
-        } catch (e) {
-            return;
+            console.log(`${index}加载失败`)
+            console.log(`加载Tampermonkey头声明文件: ${head}`)
+            const header: string = readFileSync(`./${head}`, 'utf-8');
+            const result = format(header, opt.meta);
+            // // 最后一个符号不是\n则添加\n
+            // return result.endsWith('\n') ? result : result + '\n';
+            return result;
+        } catch (e2) {
+            console.error("\x1b[31m%s\x1b[0m", "Tampermoney头声明文件加载失败");
+            if (opt.allowNoHead) return;
+            const e1NotSupported = e1 instanceof Error && e1.message === `Dynamic require of "../${index}" is not supported`
+            const e2Enoent = e2 instanceof Error && "code" in e2 && e2.code === "ENOENT";
+            if (!e1NotSupported) throw e1;
+            if (!e2Enoent) throw e2;
+            throw new Error(`未找到Tampermonkey头声明文件${index}或${head}`)
         }
     }
+}
+
+function currentTime() {
+    const now = new Date();
+
+    // 获取年份
+    const year = now.getFullYear();
+
+    // 获取月份（注意月份从0开始，需要+1）
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+
+    // 获取日期
+    const day = String(now.getDate()).padStart(2, '0');
+
+    // 获取小时
+    const hours = String(now.getHours()).padStart(2, '0');
+
+    // 获取分钟
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+
+    // 获取秒钟
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    // 获取毫秒（需要确保是3位数）
+    const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
+
+    // 组合成所需格式
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
 }
 
 /**
@@ -160,25 +199,33 @@ const loadHeader = (meta?: {[key: string]: string | number}): UserScript | strin
  * @returns 如果存在header/index.ts文件，则优先从index.ts中构造header，
  *          如果不存在，则从header/head中直接读取header
  */
-const buildHeader = (meta?: {[key: string]: string | number}): string => {
-    const script = loadHeader(meta);
-    if(!script) return "";
-    if(typeof script === 'string') {
-        return script;
-    } else {
-        return buildHeaderFromIndex(script);
-    }
+const buildHeader = (opt: Option): string => {
+    const script = loadHeader(opt);
+    const date = opt.addExportTime ? `// ${currentTime()}\n\n` : "";
+    if(!script) return date;
+    const ndate = date ? "\n" + date : "\n\n";
+    return script.trim() + ndate;
 }
 
-const headerPlugin = (meta?: {[key: string]: string | number}): Plugin => {
+type Option = {
+    // 用于字符串模板的元数据
+    meta?: {[key in string]: any},
+    // 是否允许head为空
+    allowNoHead?: boolean,
+    addExportTime?: boolean
+}
+
+const headerPlugin = (opt: Option): Plugin => {
     return {
         name: 'header-plugin',
         generateBundle(_, bundle) {
+            // vite的日志默认没有换行，这里手动添加换行
+            console.log()
             for (const fileName of Object.keys(bundle)) {
                 if (fileName === 'main.js') {
                     const file = bundle[fileName];
                     if (file.type === 'chunk'&& file.code) {
-                        const header = buildHeader(meta)
+                        const header = buildHeader(opt)
                         file.code = header + file.code;
                     }
                 }
