@@ -94,5 +94,8 @@ console.log('hello world')
 
 ## 版本说明
 
+### v1.1.2
+1. 编译结果添加编译时间
+
 ### v1.0.0
 1. 添加header/head为头部配置文件
