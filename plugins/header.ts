@@ -212,7 +212,7 @@ function currentTime() {
  */
 const buildHeader = (opt?: Option): string => {
     const script = loadHeader(opt);
-    const date = opt.addExportTime ? `// ${currentTime()}\n\n` : "";
+    const date = opt?.addExportTime ? `// ${currentTime()}\n\n` : "";
     if(!script) return date;
     const ndate = date ? "\n" + date : "\n\n";
     return script.trim() + ndate;
