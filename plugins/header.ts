@@ -143,8 +143,8 @@ const HEAD_FILE_HEAD = "header/head";
 const readHeaderFile = (opt?: Option): UserScript | string | undefined =>  {
     try{
         console.log(`加载Tampermonkey头声明文件: ${HEAD_FILE_INDEX}`)
-        const hf = `../${HEAD_FILE_INDEX}`;
-        const script: UserScript = require(hf).default
+        // 这里不能使用变脸或者字符串模板，必须这么些，否则执行会报错
+        const script: UserScript = require("../header/index.ts").default
         return script;
     } catch (e1) {
         try {
