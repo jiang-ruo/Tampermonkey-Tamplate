@@ -273,4 +273,4 @@ const headerPostPlugin = (): Plugin => {
     }
 }
 
-export {headerLoadPlugin, headerPostPlugin, readHeaderFile}
+export {headerLoadPlugin, headerPostPlugin, readHeaderFile, HEADER_NAME}

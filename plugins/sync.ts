@@ -16,14 +16,14 @@ const getScript = (): UserScript | { name: string } | undefined => {
 
     // 2. 在UserScript块中匹配@name
     const userScriptContent = userScriptMatch[0];
-    const nameMatch = userScriptContent.match(/@name\s+([^\r\n]+)/);
+    const nameMatch = userScriptContent.match(/@grant\s+([^\r\n]+)/);
     if (nameMatch) {
         const name = nameMatch[1].trim();
         return { name };
     }
 }
 
-export default (): Plugin => {
+const syncPlugin = (): Plugin => {
     return {
         name: 'sync-plugin',
         closeBundle(){
@@ -47,3 +47,5 @@ export default (): Plugin => {
         }
     }
 }
+
+export { syncPlugin }
