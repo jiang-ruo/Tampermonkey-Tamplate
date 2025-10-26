@@ -94,5 +94,5 @@ console.log('hello world')
 
 ## 版本说明
 
-### vite1.0.0
+### v1.0.0
 1. 添加header/head为头部配置文件
