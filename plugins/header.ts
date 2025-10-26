@@ -137,19 +137,20 @@ const buildHeaderFromIndex = (script: UserScript) => {
     return result;
 }
 
+const HEAD_FILE_INDEX = "header/index.ts"
+const HEAD_FILE_HEAD = "header/head";
+
 const readHeaderFile = (opt?: Option): UserScript | string | undefined =>  {
-    const index = "header/index.ts"
-    const head = "header/head";
     try{
-        console.log(`加载Tampermonkey头声明文件: ${index}`)
-        const hf = `../${index}`;
+        console.log(`加载Tampermonkey头声明文件: ${HEAD_FILE_INDEX}`)
+        const hf = `../${HEAD_FILE_INDEX}`;
         const script: UserScript = require(hf).default
         return script;
     } catch (e1) {
         try {
-            console.log(`${index}加载失败`)
-            console.log(`加载Tampermonkey头声明文件: ${head}`)
-            const header: string = readFileSync(`./${head}`, 'utf-8');
+            console.log(`${HEAD_FILE_INDEX}加载失败`)
+            console.log(`加载Tampermonkey头声明文件: ${HEAD_FILE_HEAD}`)
+            const header: string = readFileSync(`./${HEAD_FILE_HEAD}`, 'utf-8');
             const result = opt?.meta ? format(header, opt.meta) : header;
             // // 最后一个符号不是\n则添加\n
             // return result.endsWith('\n') ? result : result + '\n';
@@ -157,11 +158,11 @@ const readHeaderFile = (opt?: Option): UserScript | string | undefined =>  {
         } catch (e2) {
             console.error("\x1b[31m%s\x1b[0m", "Tampermoney头声明文件加载失败");
             if (opt?.allowNoHead) return;
-            const e1NotSupported = e1 instanceof Error && e1.message === `Dynamic require of "../${index}" is not supported`
-            const e2Enoent = e2 instanceof Error && "code" in e2 && e2.code === "ENOENT";
+            const e1NotSupported = e1 instanceof Error && e1.message === `Dynamic require of "../${HEAD_FILE_INDEX}" is not supported`
             if (!e1NotSupported) throw e1;
+            const e2Enoent = e2 instanceof Error && "code" in e2 && e2.code === "ENOENT";
             if (!e2Enoent) throw e2;
-            throw new Error(`未找到Tampermonkey头声明文件${index}或${head}`)
+            throw new Error(`未找到Tampermonkey头声明文件${HEAD_FILE_INDEX}或${HEAD_FILE_HEAD}`)
         }
     }
 }
@@ -269,8 +270,9 @@ const headerPostPlugin = (): Plugin => {
                 throw new Error("main.js资源类型错误，期望为chunk类型")
             }
             main.code = header.source + main.code;
+            delete bundle[HEADER_NAME]
         }
     }
 }
 
-export {headerLoadPlugin, headerPostPlugin, readHeaderFile}
+export {headerLoadPlugin, headerPostPlugin, readHeaderFile, HEAD_FILE_INDEX, HEAD_FILE_HEAD}
