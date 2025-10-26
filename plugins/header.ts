@@ -137,32 +137,42 @@ const buildHeaderFromIndex = (script: UserScript) => {
     return result;
 }
 
-const loadHeader = (opt: Option): string | undefined =>  {
+const readHeaderFile = (opt?: Option): UserScript | string | undefined =>  {
     const index = "header/index.ts"
     const head = "header/head";
     try{
         console.log(`加载Tampermonkey头声明文件: ${index}`)
         const hf = `../${index}`;
         const script: UserScript = require(hf).default
-        return buildHeaderFromIndex(script);
+        return script;
     } catch (e1) {
         try {
             console.log(`${index}加载失败`)
             console.log(`加载Tampermonkey头声明文件: ${head}`)
             const header: string = readFileSync(`./${head}`, 'utf-8');
-            const result = format(header, opt.meta);
+            const result = opt?.meta ? format(header, opt.meta) : header;
             // // 最后一个符号不是\n则添加\n
             // return result.endsWith('\n') ? result : result + '\n';
             return result;
         } catch (e2) {
             console.error("\x1b[31m%s\x1b[0m", "Tampermoney头声明文件加载失败");
-            if (opt.allowNoHead) return;
+            if (opt?.allowNoHead) return;
             const e1NotSupported = e1 instanceof Error && e1.message === `Dynamic require of "../${index}" is not supported`
             const e2Enoent = e2 instanceof Error && "code" in e2 && e2.code === "ENOENT";
             if (!e1NotSupported) throw e1;
             if (!e2Enoent) throw e2;
             throw new Error(`未找到Tampermonkey头声明文件${index}或${head}`)
         }
+    }
+}
+
+const loadHeader = (opt?: Option): string | undefined =>  {
+    const script = readHeaderFile(opt);
+    if(!script) return "";
+    if(typeof script === 'string') {
+        return script;
+    } else {
+        return buildHeaderFromIndex(script);
     }
 }
 
@@ -199,7 +209,7 @@ function currentTime() {
  * @returns 如果存在header/index.ts文件，则优先从index.ts中构造header，
  *          如果不存在，则从header/head中直接读取header
  */
-const buildHeader = (opt: Option): string => {
+const buildHeader = (opt?: Option): string => {
     const script = loadHeader(opt);
     const date = opt.addExportTime ? `// ${currentTime()}\n\n` : "";
     if(!script) return date;
@@ -215,23 +225,52 @@ type Option = {
     addExportTime?: boolean
 }
 
-const headerPlugin = (opt: Option): Plugin => {
+const HEADER_NAME = "header.txt"
+
+const headerLoadPlugin = (opt?: Option): Plugin => {
     return {
-        name: 'header-plugin',
+        name: 'header-load-plugin',
         generateBundle(_, bundle) {
             // vite的日志默认没有换行，这里手动添加换行
-            console.log()
-            for (const fileName of Object.keys(bundle)) {
-                if (fileName === 'main.js') {
-                    const file = bundle[fileName];
-                    if (file.type === 'chunk'&& file.code) {
-                        const header = buildHeader(opt)
-                        file.code = header + file.code;
-                    }
-                }
+            console.log();
+            const header: string = buildHeader(opt);
+            bundle[HEADER_NAME] = {
+                type: 'asset',
+                name: HEADER_NAME,
+                fileName: HEADER_NAME,
+                source: header,
+                needsCodeReference: false,
+                names: [],
+                originalFileName: "./header/",
+                originalFileNames: []
             }
         }
     }
 }
 
-export default headerPlugin
+const headerPostPlugin = (): Plugin => {
+    return {
+        name: 'header-post-plugin',
+        enforce: 'post',
+        generateBundle(_, bundle) {
+            console.log("header-post-plugin")
+            const header = bundle[HEADER_NAME]
+            if (header === undefined) {
+                throw new Error("未检测到header资源，请先添加headerLoadPlugin插件")
+            }
+            if (header.type !== "asset") {
+                throw new Error("header资源类型错误，期望为asset类型")
+            }
+            const main = bundle['main.js']
+            if (main === undefined) {
+                throw new Error("未检测到main.js资源")
+            }
+            if (main.type !== "chunk") {
+                throw new Error("main.js资源类型错误，期望为chunk类型")
+            }
+            main.code = header.source + main.code;
+        }
+    }
+}
+
+export {headerLoadPlugin, headerPostPlugin, readHeaderFile}

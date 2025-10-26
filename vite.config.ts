@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 
-import headerPlugin from "./plugins/header";
+import {headerLoadPlugin, headerPostPlugin} from "./plugins/header";
 import syncPlugin from './plugins/sync';
 
 /**
@@ -23,14 +23,15 @@ export default defineConfig({
         outDir: 'dist'
     },
     plugins: [
-        headerPlugin({
+        headerLoadPlugin({
             meta,
             allowNoHead: true,
             addExportTime: true,
         }),
+        headerPostPlugin(),
         {
             ...syncPlugin(),
             apply: (_, {mode}) => mode === 'sync'
-        }
+        },
     ]
 })
