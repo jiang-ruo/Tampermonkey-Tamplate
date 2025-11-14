@@ -144,17 +144,13 @@ const readHeaderFile = (opt?: Option): UserScript | string | undefined =>  {
     try{
         console.log(`加载Tampermonkey头声明文件: ${HEAD_FILE_INDEX}`)
         // 这里不能使用变脸或者字符串模板，必须这么些，否则执行会报错
-        const script: UserScript = require("../header/index.ts").default
-        return script;
+        return require("../header/index.ts").default as UserScript;
     } catch (e1) {
         try {
             console.log(`${HEAD_FILE_INDEX}加载失败`)
             console.log(`加载Tampermonkey头声明文件: ${HEAD_FILE_HEAD}`)
             const header: string = readFileSync(`./${HEAD_FILE_HEAD}`, 'utf-8');
-            const result = opt?.meta ? format(header, opt.meta) : header;
-            // // 最后一个符号不是\n则添加\n
-            // return result.endsWith('\n') ? result : result + '\n';
-            return result;
+            return opt?.meta ? format(header, opt.meta) : header;
         } catch (e2) {
             console.error("\x1b[31m%s\x1b[0m", "Tampermoney头声明文件加载失败");
             if (opt?.allowNoHead) return;
