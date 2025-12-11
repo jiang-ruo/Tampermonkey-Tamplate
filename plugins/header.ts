@@ -138,7 +138,7 @@ const buildHeaderFromIndex = (script: UserScript) => {
 }
 
 const HEAD_FILE_INDEX = "header/index.ts"
-const HEAD_FILE_HEAD = "header/head";
+const HEAD_FILE_HEAD = "header/header.txt";
 
 const readHeaderFile = (opt?: Option): UserScript | string | undefined =>  {
     try{
@@ -148,14 +148,19 @@ const readHeaderFile = (opt?: Option): UserScript | string | undefined =>  {
     } catch (e1) {
         try {
             console.log(`${HEAD_FILE_INDEX}加载失败`)
-            console.log(`加载Tampermonkey头声明文件: ${HEAD_FILE_HEAD}`)
-            const header: string = readFileSync(`./${HEAD_FILE_HEAD}`, 'utf-8');
-            return opt?.meta ? format(header, opt.meta) : header;
+            if (!opt?.allowNoHead) {
+                // 不是因为index.ts文件不存在报错
+                const e1NotSupported = e1 instanceof Error && e1.message === `Dynamic require of "../${HEAD_FILE_INDEX}" is not supported`
+                if (!e1NotSupported) throw e1;
+                // index.ts不存在，尝试加载head文件
+                console.log(`加载Tampermonkey头声明文件: ${HEAD_FILE_HEAD}`)
+                const header: string = readFileSync(`./${HEAD_FILE_HEAD}`, 'utf-8');
+                return opt?.meta ? format(header, opt.meta) : header;
+            }
+            return undefined;
         } catch (e2) {
             console.error("\x1b[31m%s\x1b[0m", "Tampermoney头声明文件加载失败");
             if (opt?.allowNoHead) return;
-            const e1NotSupported = e1 instanceof Error && e1.message === `Dynamic require of "../${HEAD_FILE_INDEX}" is not supported`
-            if (!e1NotSupported) throw e1;
             const e2Enoent = e2 instanceof Error && "code" in e2 && e2.code === "ENOENT";
             if (!e2Enoent) throw e2;
             throw new Error(`未找到Tampermonkey头声明文件${HEAD_FILE_INDEX}或${HEAD_FILE_HEAD}`)

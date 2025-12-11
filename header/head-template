@@ -1,7 +1,10 @@
 // ==UserScript==
-// @version     {version} // 在vite.config.ts中配置version的具体数值
-// 油猴脚本声明
-// ==/UserScript==
+// @name        name
+// @namespace	namespace
+// @description description
+// @version     0.0.0
+// @author		author
+// @match       match url
+// @license		your license
 //
-/* global 全局函数声明 */
-
+// ==/UserScript==
