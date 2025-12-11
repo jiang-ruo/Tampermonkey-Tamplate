@@ -32,7 +32,6 @@ export default defineConfig({
 		vueCssPlugin(),
 		headerLoadPlugin({
 			meta,
-			allowNoHead: true,
 			addExportTime: true,
 		}),
 		headerPostPlugin(),

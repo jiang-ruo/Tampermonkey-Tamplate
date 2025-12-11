@@ -7,14 +7,57 @@
 
 ## TODO
 1. 添加多脚本支持
+2. 从vite中新拉出两个分支，分别为新版装饰器(decorator_standard)和旧版装饰器(decorator_old)
 
 ## 分支关系
 
 vite -> vue -> vue-router
 
+vite -> decorator_old
+
+vite -> decorator_standard
+
 vite分支的内容应当合并到vue分支
 
 vue分支的内容应当合并到vue-router分支
+
+decorator_old分支和decorator_standard分支是相对独立的两个分支
+
+当需要的时候，可以将decorator分支合并到vue分支或vue-router分支，给这两个分支添加装饰器功能
+
+```mermaid
+---
+config:
+  gitGraph:
+    mainBranchName: 'vite'
+    parallelCommits: true
+---
+gitGraph
+    branch vue
+    branch vue-router
+    branch decorator_old
+    branch decorator_standard
+    
+    checkout vite
+    commit "vite commit"
+    
+    checkout vue
+    commit "vue commit"
+    merge vite
+    
+    checkout vue-router
+    commit "vue-router commit"
+    merge vue
+    
+    checkout decorator_old
+    commit "decorator_old commit"
+    merge vite
+    
+    checkout decorator_standard
+    commit "decorator_standard commit"
+    merge vite
+    
+```
 
 ## 使用方式
 
@@ -42,9 +85,9 @@ console.log('hello world')
 
 ## 头部区域
 
-头部区域的开发是在`header/index.ts`或`header/head`。
+头部区域的开发是在`header/index.ts`或`header/header.txt`。
 `header/index.ts`使用了typescript，这样会有IDE完全支持，而不是单纯的写几个注释；
-`header/head`则直接将油猴脚本头部放入head文件即可，支持`string-template`模板。
+`header/header.txt`则直接将油猴脚本头部放入head文件即可，支持`string-template`模板。
 若上述二者同时存在，则优先使用`header/index.ts`。
 
 ![img](https://pic.imgdb.cn/item/6506d2f7661c6c8e5458afce.png)
@@ -93,6 +136,10 @@ console.log('hello world')
 [server.cjs](https://github.com/Tampermonkey/tamperdav/blob/master/server.js)  （有修改）
 
 ## 版本说明
+
+### v1.1.12
+1. 修复header插件加载index.ts出错时，直接加载head的bug
+2. 将header/head头部配置文件，修改为header/header.txt
 
 ### v1.1.2
 1. 编译结果添加编译时间
