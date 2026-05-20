@@ -2,7 +2,7 @@
 // @name        name
 // @namespace	namespace
 // @description description
-// @version     0.0.0
+// @version     {version}
 // @author		author
 // @match       match url
 // @license		your license

@@ -14,17 +14,17 @@
 
 vite -> vue -> vue-router
 
-vite -> decorator_old
+vite -> tt-router
 
-vite -> decorator_standard
+vite -> multi-entry
 
 vite分支的内容应当合并到vue分支
 
 vue分支的内容应当合并到vue-router分支
 
-decorator_old分支和decorator_standard分支是相对独立的两个分支
+tt-router: 经过实际开发发现，虽然油猴脚本本身已经按照网站匹配运行了，但实际上一个脚本的运行过程中往往会按照不同页面运行不同的功能，因此添加一个路由功能。
 
-当需要的时候，可以将decorator分支合并到vue分支或vue-router分支，给这两个分支添加装饰器功能
+multi-entry: 多脚本支持，一个项目可以包含多个油猴脚本，每个脚本都有自己的配置文件和正文。
 
 ```mermaid
 ---
@@ -36,8 +36,8 @@ config:
 gitGraph
     branch vue
     branch vue-router
-    branch decorator_old
-    branch decorator_standard
+    branch tt-router
+    branch multi-entry
     
     checkout vite
     commit "vite commit"
@@ -50,12 +50,12 @@ gitGraph
     commit "vue-router commit"
     merge vue
     
-    checkout decorator_old
-    commit "decorator_old commit"
+    checkout tt-router
+    commit "tt-router commit"
     merge vite
     
-    checkout decorator_standard
-    commit "decorator_standard commit"
+    checkout multi-entry
+    commit "multi-entry commit"
     merge vite
     
 ```
