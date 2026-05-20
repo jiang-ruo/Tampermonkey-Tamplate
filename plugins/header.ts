@@ -146,13 +146,16 @@ const readHeaderFile = (opt?: Option): UserScript | string | undefined =>  {
         // 这里不能使用变脸或者字符串模板，必须这么些，否则执行会报错
         return require("../header/index.ts").default as UserScript;
     } catch (e1) {
-        try {
-            console.log(`${HEAD_FILE_INDEX}加载失败`)
-            if (!opt?.allowNoHead) {
-                // 不是因为index.ts文件不存在报错
-                const e1NotSupported = e1 instanceof Error && e1.message === `Dynamic require of "../${HEAD_FILE_INDEX}" is not supported`
-                if (!e1NotSupported) throw e1;
+        console.log(`${HEAD_FILE_INDEX}加载失败`)
+        if (!opt?.allowNoHead) {
+            // 不是因为index.ts文件不存在报错
+            const e1NotSupported = e1 instanceof Error && e1.message === `Dynamic require of "../${HEAD_FILE_INDEX}" is not supported`
+            if (!e1NotSupported) {
+                console.error("\x1b[31m%s\x1b[0m", "Tampermoney头声明文件加载失败");
+                throw e1;
             }
+        }
+        try {
             // index.ts不存在，尝试加载head文件
             console.log(`加载Tampermonkey头声明文件: ${HEAD_FILE_HEAD}`)
             const header: string = readFileSync(`./${HEAD_FILE_HEAD}`, 'utf-8');

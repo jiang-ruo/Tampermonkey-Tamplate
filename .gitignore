@@ -26,3 +26,4 @@ dist-ssr
 temp/Tampermonkey/sync/*.js
 temp/Tampermonkey/sync/*.json
 pnpm-lock.yaml
+.mise.local.toml
