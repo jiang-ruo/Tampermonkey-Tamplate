@@ -6,6 +6,7 @@
   "node": "22",
   "scripts": {
     "build": "tsc && vite build",
+    "build:watch": "tsc && vite build --watch",
     "build:sync": "tsc && vite build --watch --mode sync",
     "start:server": "node server.cjs"
   },
