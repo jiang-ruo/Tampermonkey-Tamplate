@@ -28,5 +28,5 @@
     "transpileOnly": true,
     "files": true
   },
-  "include": ["src", "*.d.ts"]
+  "include": ["src", "tests", "*.d.ts"]
 }
