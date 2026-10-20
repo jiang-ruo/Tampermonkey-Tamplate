@@ -101,7 +101,7 @@ declare function GM_setValue(name: string, value: any): void;
 /*
 从存储中获取 'name' 的值。
 * */
-declare function GM_getValue(name: string, defaultValue ?: any): any;
+declare function GM_getValue<T extends any>(name: string, defaultValue ?: T): T;
 
 /*
 将消息打印到控制台。
